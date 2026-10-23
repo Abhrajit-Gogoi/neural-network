@@ -13,5 +13,5 @@ the following code has a dataset of 4 people and their weights and heights and g
 
 ### signing off
 
-    this is just part 1 of my project i will continue it in another ysws for the next part so all this does is run a program to minimise the loss function
+    this is just part 1 of my project i will continue it in another ysws for the next part so all this does is run a program to minimise the loss functiona
 

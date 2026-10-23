@@ -1,111 +1,66 @@
 import numpy as np
 
+def sg(x,d=False):
+    if d == True:
+        return x*(1-x)
+    return 1/(1+np.exp(-x))
 
-def sigmoid(x):
-  # Sigmoid activation function: f(x) = 1 / (1 + e^(-x))
-  return 1 / (1 + np.exp(-x))
+## initialising the weights (randomly and nor using a random module)
+w1 = np.array(([0.3,0.2],[-0.2,0.022]))   # these are wights for connection between input and first hidden layer
 
-def deriv_sigmoid(x):
-  # Derivative of sigmoid: f'(x) = f(x) * (1 - f(x))
-  fx = sigmoid(x)
-  return fx * (1 - fx)
+w2 = np.array([-0.03,0.2])  # connections between first layer and the output neuron
 
-def mse_loss(y_true, y_pred):
-  # y_true and y_pred are numpy arrays of the same length.
-  return ((y_true - y_pred) ** 2).mean()
 
-class OurNeuralNetwork:
-  def __init__(self):
-    # Weights
-    self.w1 = np.random.normal()
-    self.w2 = np.random.normal()
-    self.w3 = np.random.normal()
-    self.w4 = np.random.normal()
-    self.w5 = np.random.normal()
-    self.w6 = np.random.normal()
+# defining loss function
+def mse(y_t, y_p):
+    return (y_t-y_p)**2
 
-    # Biases
-    self.b1 = np.random.normal()
-    self.b2 = np.random.normal()
-    self.b3 = np.random.normal()
 
-  def feedforward(self, x):
-    # x is a numpy array with 2 elements.
-    h1 = sigmoid(self.w1 * x[0] + self.w2 * x[1] + self.b1)
-    h2 = sigmoid(self.w3 * x[0] + self.w4 * x[1] + self.b2)
-    o1 = sigmoid(self.w5 * h1 + self.w6 * h2 + self.b3)
-    return o1
 
-  def train(self, data, all_y_trues):
+# calculating the partial derivatives
+def pardev(mse,h,o,i):
+    # first layer
+    d1 = mse*w2[0]*sg(o,True)*i[0]*sg(sg(h[0]),True)
+    d2 = mse*w2[0]*sg(o,True)*i[1]*sg(sg(h[0]),True)
+    d3 = mse*w2[1]*sg(o,True)*i[0]*sg(sg(h[1]),True)
+    d4 = mse*w2[1]*sg(o,True)*i[1]*sg(sg(h[1]),True)
 
+    # second layer
+    d5 = mse*h[0]*sg(o,True)
+    d6 = mse*h[1]*sg(o,True)
+    out = np.array([d1,d2,d3,d4,d5,d6])
     
-    learn_rate = 1
-    epochs = 500 # number of times to loop through the entire dataset
+    return out
 
-    for epoch in range(epochs):
-      for x, y_true in zip(data, all_y_trues):
-        # --- Do a feedforward (we'll need these values later)
-        sum_h1 = self.w1 * x[0] + self.w2 * x[1] + self.b1
-        h1 = sigmoid(sum_h1)
+# defining the class and training bg
+class net:
+    def __init__(self,w1,w2):
+        self.w1 = w1
+        self.w2 = w2
+    def train(self,x, y_t,epoch):
+        n=0.1
+        for j in range(epoch):
+            for i in range(len(x)):
+                h = np.dot(self.w1,x[i])
+                o = np.dot(self.w2,sg(h))
+                ms = -2*(y_t[i]-sg(o))
+                lr = n*pardev(ms,sg(h),sg(o),x[i])
+                self.w1 = self.w1 - np.array(([lr[0],lr[1]],[lr[2],lr[3]]))
+                self.w2 -= np.array([lr[4],lr[5]])
+            if j % 100 == 0:
+                print(f"epoch: {j}, loss = {mse(y_t[i],sg(o))}")
 
-        sum_h2 = self.w3 * x[0] + self.w4 * x[1] + self.b2
-        h2 = sigmoid(sum_h2)
+        print('w1 = ',self.w1)
+        print('w2 = ',self.w2)
 
-        sum_o1 = self.w5 * h1 + self.w6 * h2 + self.b3
-        o1 = sigmoid(sum_o1)
-        y_pred = o1
 
-        # --- Calculate partial derivatives.
-        # --- Naming: d_L_d_w1 represents "partial L / partial w1"
-        d_L_d_ypred = -2 * (y_true - y_pred)
-
-        # Neuron o1
-        d_ypred_d_w5 = h1 * deriv_sigmoid(sum_o1)
-        d_ypred_d_w6 = h2 * deriv_sigmoid(sum_o1)
-        d_ypred_d_b3 = deriv_sigmoid(sum_o1)
-
-        d_ypred_d_h1 = self.w5 * deriv_sigmoid(sum_o1)
-        d_ypred_d_h2 = self.w6 * deriv_sigmoid(sum_o1)
-
-        # Neuron h1
-        d_h1_d_w1 = x[0] * deriv_sigmoid(sum_h1)
-        d_h1_d_w2 = x[1] * deriv_sigmoid(sum_h1)
-        d_h1_d_b1 = deriv_sigmoid(sum_h1)
-
-        # Neuron h2
-        d_h2_d_w3 = x[0] * deriv_sigmoid(sum_h2)
-        d_h2_d_w4 = x[1] * deriv_sigmoid(sum_h2)
-        d_h2_d_b2 = deriv_sigmoid(sum_h2)
-
-        # --- Update weights and biases
-        # Neuron h1
-        self.w1 -= learn_rate * d_L_d_ypred * d_ypred_d_h1 * d_h1_d_w1
-        self.w2 -= learn_rate * d_L_d_ypred * d_ypred_d_h1 * d_h1_d_w2
-        self.b1 -= learn_rate * d_L_d_ypred * d_ypred_d_h1 * d_h1_d_b1
-
-        # Neuron h2
-        self.w3 -= learn_rate * d_L_d_ypred * d_ypred_d_h2 * d_h2_d_w3
-        self.w4 -= learn_rate * d_L_d_ypred * d_ypred_d_h2 * d_h2_d_w4
-        self.b2 -= learn_rate * d_L_d_ypred * d_ypred_d_h2 * d_h2_d_b2
-
-        # Neuron o1
-        self.w5 -= learn_rate * d_L_d_ypred * d_ypred_d_w5
-        self.w6 -= learn_rate * d_L_d_ypred * d_ypred_d_w6
-        self.b3 -= learn_rate * d_L_d_ypred * d_ypred_d_b3
-
-      # --- Calculate total loss at the end of each epoch
-      if epoch % 10 == 0:
-        y_preds = np.apply_along_axis(self.feedforward, 1, data)
-        loss = mse_loss(all_y_trues, y_preds)
-        print("Epoch %d loss: %.3f" % (epoch, loss))
-
-# Define dataset
 data = np.array([
   [-2, -1],  # Alice
   [25, 6],   # Bob
   [17, 4],   # Charlie
   [-15, -6], # Diana
 ])
+
 all_y_trues = np.array([
   1, # Alice
   0, # Bob
@@ -113,6 +68,5 @@ all_y_trues = np.array([
   1, # Diana
 ])
 
-# Train our neural network!
-network = OurNeuralNetwork()
-network.train(data, all_y_trues)
+n = net(w1,w2)
+n.train(data, all_y_trues, 1000)
