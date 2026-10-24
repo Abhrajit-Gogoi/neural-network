@@ -7,6 +7,17 @@ i am a beginner to the ai world and am going to be learning about it from scratc
 The Modified National Institute of Standards and Technology (MNIST) database is widely regarded as the "Hello World" benchmark of machine learning and computer vision, specifically designed for training and evaluating pattern recognition systems. Compiled from NIST's original datasets, MNIST comprises 70,000 grayscale images of handwritten digits (0 through 9), standardized to a 28×28 pixel grid, centered, and cleanly normalized. The collection is partitioned into 60,000 training images and 10,000 testing images. Because of its low computational overhead, uniform formatting, and well-defined structure, it serves as the foundational proving ground for verifying neural network architectures—ranging from simple multi-layer perceptrons to advanced convolutional neural networks (CNNs)—before scaling them to complex, real-world data tasks.
 
 
+### how to run:
+
+clone the repo and run on your device:
+```
+python app.py
+```
+
+else visit the demo link and try there.
+
+draw any character from 0 to 9 and click predict the model will try to predict your character. It might be inaccurate a lot of times so be sure to try it more than once.
+
 ### demonstration:
 
 demo link: https://neuralnetworks.duckdns.org/
