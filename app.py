@@ -8,20 +8,15 @@ from tensorflow.keras.layers import Dense,Dropout, Input
 
 app = Flask(__name__)
 
-# Rebuild your exact model architecture
 model = Sequential([
     Input(shape=(784,)),
     Dense(64, activation='relu'),
-    Dropout(0.5),
     Dense(64, activation='relu'),
-    Dropout(0.5),
     Dense(64, activation='relu'),
-    Dropout(0.5),
     Dense(64, activation='relu'),
-    Dropout(0.5),
     Dense(10, activation='softmax')
 ])
-# Load your pre-trained weights
+# Load pre-trained weights
 model.load_weights('model.weights.h5')
 
 @app.route("/")
@@ -44,10 +39,10 @@ def predict():
     # Convert to array and normalize (0.0 to 1.0)
     img_array = np.array(image).astype(np.float32) / 255.0
     
-    # Flatten to match your model's input_shape = (784,) with batch size 1 -> (1, 784)
+    # Flatten to match model's input_shape = (784,) with batch size 1 (1, 784)
     flat_input = img_array.reshape(1, 784)
     
-    # Run prediction through your model
+    # Run prediction through  model
     predictions = model.predict(flat_input)
     predicted_digit = int(np.argmax(predictions[0]))
     
